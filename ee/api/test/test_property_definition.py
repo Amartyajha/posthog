@@ -479,7 +479,7 @@ class TestPropertyDefinitionEnterpriseAPI(APIBaseTest):
             definition = EnterprisePropertyDefinition.objects.filter(name=property["name"], team=self.team).first()
             if definition is None:
                 raise AssertionError(f"Property definition {property['name']} not found")
-            definition.verified = property["verified"] or False
+            definition.verified = property["verified"]
             definition.save()
 
         response = self.client.get("/api/projects/@current/property_definitions/")

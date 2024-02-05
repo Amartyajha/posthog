@@ -54,9 +54,7 @@ def get_tagged_issues_stats(
     url = f"https://sentry.io/api/0/organizations/{org_slug}/issues-stats/"
     headers = {"Authorization": f"Bearer {token}"}
 
-    query = "is:unresolved"
-    for tag, value in tags.items():
-        query += f" {tag}:{value}"
+    query = "is:unresolved" + ''.join([f" {tag}:{value}" for (tag, value) in tags.items()])
 
     params: Dict[str, Union[list, str]] = {
         "start": start_time,

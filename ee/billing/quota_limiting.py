@@ -187,7 +187,7 @@ def update_all_org_billing_quotas(dry_run: bool = False) -> Dict[str, Dict[str, 
     period_start, period_end = period
 
     # Clickhouse is good at counting things so we count across all teams rather than doing it one by one
-    all_data = dict(
+    all_data = {
         teams_with_event_count_in_period=convert_team_usage_rows_to_dict(
             get_teams_with_billable_event_count_in_period(period_start, period_end)
         ),
@@ -197,7 +197,7 @@ def update_all_org_billing_quotas(dry_run: bool = False) -> Dict[str, Dict[str, 
         teams_with_rows_synced_in_period=convert_team_usage_rows_to_dict(
             get_teams_with_rows_synced_in_period(period_start, period_end)
         ),
-    )
+    }
 
     teams: Sequence[Team] = list(
         Team.objects.select_related("organization").exclude(

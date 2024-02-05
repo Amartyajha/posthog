@@ -267,17 +267,12 @@ class EnterpriseCohortQuery(FOSSCohortQuery):
 
     @cached_property
     def sequence_filters_to_query(self) -> List[Property]:
-        props = []
-        for prop in self._filter.property_groups.flat:
-            if prop.value == "performed_event_sequence":
-                props.append(prop)
+        props = [prop for prop in self._filter.property_groups.flat if prop.value == "performed_event_sequence"]
         return props
 
     @cached_property
     def sequence_filters_lookup(self) -> Dict[str, str]:
-        lookup = {}
-        for idx, prop in enumerate(self.sequence_filters_to_query):
-            lookup[str(prop.to_dict())] = f"{idx}"
+        lookup = {str(prop.to_dict()): f"{idx}" for (idx, prop) in enumerate(self.sequence_filters_to_query)}
         return lookup
 
     def _get_sequence_query(self) -> Tuple[str, Dict[str, Any], str]:
@@ -384,16 +379,8 @@ class EnterpriseCohortQuery(FOSSCohortQuery):
         condition_cols.append(f"{event_prepend}_latest_0")
         condition_cols.append(timestamp_condition)
 
-        step_cols = []
-        step_cols.append(
-            f"if({entity_query} AND timestamp > now() - INTERVAL {time_value} {time_interval}, 1, 0) AS {event_prepend}_step_0"
-        )
-        step_cols.append(f"if({event_prepend}_step_0 = 1, timestamp, null) AS {event_prepend}_latest_0")
+        step_cols = [f"if({entity_query} AND timestamp > now() - INTERVAL {time_value} {time_interval}, 1, 0) AS {event_prepend}_step_0", f"if({event_prepend}_step_0 = 1, timestamp, null) AS {event_prepend}_latest_0", f"if({seq_entity_query} AND timestamp > now() - INTERVAL {time_value} {time_interval}, 1, 0) AS {event_prepend}_step_1", f"if({event_prepend}_step_1 = 1, timestamp, null) AS {event_prepend}_latest_1"]
 
-        step_cols.append(
-            f"if({seq_entity_query} AND timestamp > now() - INTERVAL {time_value} {time_interval}, 1, 0) AS {event_prepend}_step_1"
-        )
-        step_cols.append(f"if({event_prepend}_step_1 = 1, timestamp, null) AS {event_prepend}_latest_1")
 
         return (
             step_cols,

@@ -46,28 +46,8 @@ def get_dlq_event():
 
 
 def convert_query_result_to_dlq_event_dicts(query_result):
-    events_returned = []
+    events_returned = [{"id": str(read_dlq_event[0]), "event_uuid": str(read_dlq_event[1]), "event": str(read_dlq_event[2]), "properties": str(read_dlq_event[3]), "distinct_id": str(read_dlq_event[4]), "team_id": int(read_dlq_event[5]), "elements_chain": str(read_dlq_event[6]), "created_at": read_dlq_event[7].strftime("%Y-%m-%d %H:%M:%S.%f"), "ip": str(read_dlq_event[8]), "site_url": str(read_dlq_event[9]), "now": read_dlq_event[10].strftime("%Y-%m-%d %H:%M:%S.%f"), "raw_payload": str(read_dlq_event[11]), "error_timestamp": read_dlq_event[12].strftime("%Y-%m-%d %H:%M:%S.%f"), "error_location": str(read_dlq_event[13]), "error": str(read_dlq_event[14])} for read_dlq_event in query_result]
 
-    for read_dlq_event in query_result:
-        events_returned.append(
-            {
-                "id": str(read_dlq_event[0]),
-                "event_uuid": str(read_dlq_event[1]),
-                "event": str(read_dlq_event[2]),
-                "properties": str(read_dlq_event[3]),
-                "distinct_id": str(read_dlq_event[4]),
-                "team_id": int(read_dlq_event[5]),
-                "elements_chain": str(read_dlq_event[6]),
-                "created_at": read_dlq_event[7].strftime("%Y-%m-%d %H:%M:%S.%f"),
-                "ip": str(read_dlq_event[8]),
-                "site_url": str(read_dlq_event[9]),
-                "now": read_dlq_event[10].strftime("%Y-%m-%d %H:%M:%S.%f"),
-                "raw_payload": str(read_dlq_event[11]),
-                "error_timestamp": read_dlq_event[12].strftime("%Y-%m-%d %H:%M:%S.%f"),
-                "error_location": str(read_dlq_event[13]),
-                "error": str(read_dlq_event[14]),
-            }
-        )
     return events_returned
 
 
