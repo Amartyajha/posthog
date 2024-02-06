@@ -30,7 +30,9 @@ class RolePermissions(BasePermission):
             organization=organization,
         )
 
-        return request.method in SAFE_METHODS or requesting_membership.level >= OrganizationMembership.Level.ADMIN
+        if request.method in SAFE_METHODS or requesting_membership.level >= OrganizationMembership.Level.ADMIN:
+            return True
+        return False
 
 
 class RoleSerializer(serializers.ModelSerializer):

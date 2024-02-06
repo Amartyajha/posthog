@@ -95,7 +95,7 @@ class BillingManager:
 
             if organization and organization.usage and organization.usage.get(usage_key, {}).get("todays_usage", None):
                 todays_usage = organization.usage[usage_key]["todays_usage"]
-                current_usage += todays_usage
+                current_usage = current_usage + todays_usage
 
             product["current_usage"] = current_usage
             product["percentage_usage"] = current_usage / usage_limit if usage_limit else 0
