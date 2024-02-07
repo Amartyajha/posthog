@@ -383,8 +383,12 @@ def calculate_probability_of_winning_for_each(variants: List[Variant]) -> List[P
             code="too_much_data",
         )
 
-    probabilities = [simulate_winning_variant_for_arrival_rates(variant, variants[:index] + variants[index + 1:]) for (index, variant) in enumerate(variants)]
+    probabilities = []
     # simulate winning for each test variant
+    for index, variant in enumerate(variants):
+        probabilities.append(
+            simulate_winning_variant_for_arrival_rates(variant, variants[:index] + variants[index + 1 :])
+        )
 
     total_test_probabilities = sum(probabilities[1:])
 
@@ -465,7 +469,7 @@ def validate_event_variants(insight_results, variants):
     if not test_variant_found:
         missing_variants.extend(test_variants)
 
-    if len(missing_variants) != 0:
+    if not len(missing_variants) == 0:
         missing_variants_str = ", ".join(missing_variants)
         message = f"No experiment events have been ingested yet for the following variants: {missing_variants_str}"
         raise ValidationError(message, code=f"missing-flag-variants::{missing_variants_str}")

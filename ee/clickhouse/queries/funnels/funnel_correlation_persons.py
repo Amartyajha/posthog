@@ -45,9 +45,10 @@ class FunnelCorrelationActors(ActorBaseQuery):
             return _FunnelPropertyCorrelationActors(self._filter, self._team, self._base_uri).actor_query(
                 limit_actors=limit_actors
             )
-        return _FunnelEventsCorrelationActors(self._filter, self._team, self._base_uri).actor_query(
-            limit_actors=limit_actors
-        )
+        else:
+            return _FunnelEventsCorrelationActors(self._filter, self._team, self._base_uri).actor_query(
+                limit_actors=limit_actors
+            )
 
     def get_actors(
         self,
@@ -58,7 +59,8 @@ class FunnelCorrelationActors(ActorBaseQuery):
     ]:
         if self._filter.correlation_type == FunnelCorrelationType.PROPERTIES:
             return _FunnelPropertyCorrelationActors(self._filter, self._team, self._base_uri).get_actors()
-        return _FunnelEventsCorrelationActors(self._filter, self._team, self._base_uri).get_actors()
+        else:
+            return _FunnelEventsCorrelationActors(self._filter, self._team, self._base_uri).get_actors()
 
 
 class _FunnelEventsCorrelationActors(ActorBaseQuery):

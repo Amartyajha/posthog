@@ -158,6 +158,6 @@ class ClickhousePaths(Paths):
         ]
 
         if self._filter.end_point:
-            return tuple(f'arraySlice({field}, (-1) * %(event_in_session_limit)s)
+            return tuple([f"arraySlice({field}, (-1) * %(event_in_session_limit)s)" for field in fields_to_include])
         else:
-            return tuple(f'arraySlice({field}, 1, %(event_in_session_limit)s)
+            return tuple([f"arraySlice({field}, 1, %(event_in_session_limit)s)" for field in fields_to_include])
