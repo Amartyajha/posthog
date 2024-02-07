@@ -59,8 +59,7 @@ def application(environ, start_response):
             retries -= 1
             time.sleep(1)
             return application(environ, start_response)
-        else:
-            raise e
+        raise e
     finally:
         try:
             connection.close()
@@ -73,11 +72,11 @@ def application(environ, start_response):
     UNIT_CONNECTIONS_CLOSED.set(statj["connections"]["closed"])
     UNIT_CONNECTIONS_TOTAL.set(statj["requests"]["total"])
 
-    for app in statj["applications"].keys():
-        UNIT_PROCESSES_RUNNING_GAUGE.labels(application=app).set(statj["applications"][app]["processes"]["running"])
-        UNIT_PROCESSES_STARTING_GAUGE.labels(application=app).set(statj["applications"][app]["processes"]["starting"])
-        UNIT_PROCESSES_IDLE_GAUGE.labels(application=app).set(statj["applications"][app]["processes"]["idle"])
-        UNIT_REQUESTS_ACTIVE_GAUGE.labels(application=app).set(statj["applications"][app]["requests"]["active"])
+    for (app, statj__applications___app) in statj["applications"].items():
+        UNIT_PROCESSES_RUNNING_GAUGE.labels(application=app).set(statj__applications___app["processes"]["running"])
+        UNIT_PROCESSES_STARTING_GAUGE.labels(application=app).set(statj__applications___app["processes"]["starting"])
+        UNIT_PROCESSES_IDLE_GAUGE.labels(application=app).set(statj__applications___app["processes"]["idle"])
+        UNIT_REQUESTS_ACTIVE_GAUGE.labels(application=app).set(statj__applications___app["requests"]["active"])
 
     start_response("200 OK", [("Content-Type", "text/plain")])
     # Create the prometheus multi-process metric registry here

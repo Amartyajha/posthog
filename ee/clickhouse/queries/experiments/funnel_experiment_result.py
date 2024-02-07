@@ -288,10 +288,8 @@ def calculate_probability_of_winning_for_each(variants: List[Variant]) -> List[P
             code="too_much_data",
         )
 
-    probabilities = []
+    probabilities = [simulate_winning_variant_for_conversion(variant, variants[:index] + variants[index + 1:]) for (index, variant) in enumerate(variants)]
     # simulate winning for each test variant
-    for index, variant in enumerate(variants):
-        probabilities.append(simulate_winning_variant_for_conversion(variant, variants[:index] + variants[index + 1 :]))
 
     total_test_probabilities = sum(probabilities[1:])
 
@@ -302,11 +300,7 @@ def validate_event_variants(funnel_results, variants):
     if not funnel_results or not funnel_results[0]:
         raise ValidationError("No experiment events have been ingested yet.", code="no-events")
 
-    eventsWithOrderZero = []
-    for eventArr in funnel_results:
-        for event in eventArr:
-            if event.get("order") == 0:
-                eventsWithOrderZero.append(event)
+    eventsWithOrderZero = [event for eventArr in funnel_results for event in eventArr if event.get("order") == 0]
 
     missing_variants = []
 
@@ -331,7 +325,7 @@ def validate_event_variants(funnel_results, variants):
     if not test_variant_found:
         missing_variants.extend(test_variants)
 
-    if not len(missing_variants) == 0:
+    if len(missing_variants) != 0:
         missing_variants_str = ", ".join(missing_variants)
         message = f"No experiment events have been ingested yet for the following variants: {missing_variants_str}"
         raise ValidationError(message, code=f"missing-flag-variants::{missing_variants_str}")

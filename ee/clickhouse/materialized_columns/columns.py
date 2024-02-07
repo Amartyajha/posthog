@@ -49,8 +49,7 @@ def get_materialized_columns(
     )
     if rows and get_instance_setting("MATERIALIZED_COLUMNS_ENABLED"):
         return {_extract_property(comment): column_name for comment, column_name in rows}
-    else:
-        return {}
+    return {}
 
 
 def materialize(
@@ -200,7 +199,7 @@ def _materialized_column_name(
 ) -> str:
     "Returns a sanitized and unique column name to use for materialized column"
 
-    prefix = "mat_" if table == "events" or table == "groups" else "pmat_"
+    prefix = "mat_" if table in {'events', 'groups'} else "pmat_"
 
     if table_column != DEFAULT_TABLE_COLUMN:
         prefix += f"{SHORT_TABLE_COLUMN_NAME[table_column]}_"

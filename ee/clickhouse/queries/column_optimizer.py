@@ -1,5 +1,5 @@
-from typing import Counter as TCounter
-from typing import Set, cast
+from typing import Counter as TCounter, Set, cast
+
 
 from posthog.clickhouse.materialized_columns.column import ColumnName
 from posthog.constants import TREND_FILTER_TYPE_ACTIONS, FunnelCorrelationType
@@ -22,7 +22,7 @@ class EnterpriseColumnOptimizer(FOSSColumnOptimizer):
     @cached_property
     def group_types_to_query(self) -> Set[GroupTypeIndex]:
         used_properties = self.used_properties_with_type("group")
-        return set(cast(GroupTypeIndex, group_type_index) for _, _, group_type_index in used_properties)
+        return {cast(GroupTypeIndex, group_type_index) for (_, _, group_type_index) in used_properties}
 
     @cached_property
     def group_on_event_columns_to_query(self) -> Set[ColumnName]:
@@ -52,7 +52,7 @@ class EnterpriseColumnOptimizer(FOSSColumnOptimizer):
             #
             # See ee/clickhouse/queries/trends/breakdown.py#get_query or
             # ee/clickhouse/queries/breakdown_props.py#get_breakdown_prop_values
-            if self.filter.breakdown_type in ["event", "person"]:
+            if self.filter.breakdown_type in {"event", "person"}:
                 boxed_breakdown = box_value(self.filter.breakdown)
                 for b in boxed_breakdown:
                     if isinstance(b, str):

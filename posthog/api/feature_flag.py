@@ -80,8 +80,7 @@ class CanEditFeatureFlag(BasePermission):
     def has_object_permission(self, request: Request, view, feature_flag) -> bool:
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return can_user_edit_feature_flag(request, feature_flag)
+        return can_user_edit_feature_flag(request, feature_flag)
 
 
 class FeatureFlagSerializer(TaggedItemSerializerMixin, serializers.HyperlinkedModelSerializer):
@@ -162,8 +161,7 @@ class FeatureFlagSerializer(TaggedItemSerializerMixin, serializers.HyperlinkedMo
     def get_rollout_percentage(self, feature_flag: FeatureFlag) -> Optional[int]:
         if self.get_is_simple_flag(feature_flag):
             return feature_flag.conditions[0].get("rollout_percentage")
-        else:
-            return None
+        return None
 
     def validate_key(self, value):
         exclude_kwargs = {}
@@ -196,7 +194,7 @@ class FeatureFlagSerializer(TaggedItemSerializerMixin, serializers.HyperlinkedMo
             )
 
         if aggregation_group_type_index is None:
-            is_valid = properties_all_match(lambda prop: prop.type in ["person", "cohort"])
+            is_valid = properties_all_match(lambda prop: prop.type in {"person", "cohort"})
             if not is_valid:
                 raise serializers.ValidationError("Filters are not valid (can only use person and cohort properties)")
         elif self.instance is not None and hasattr(self.instance, "features") and self.instance.features.count() > 0:
@@ -236,7 +234,7 @@ class FeatureFlagSerializer(TaggedItemSerializerMixin, serializers.HyperlinkedMo
                             code="cohort_does_not_exist",
                         )
 
-                if prop.operator in ("is_date_before", "is_date_after"):
+                if prop.operator in {"is_date_before", "is_date_after"}:
                     parsed_date = determine_parsed_date_for_property_matching(prop.value)
 
                     if not parsed_date:
@@ -267,9 +265,7 @@ class FeatureFlagSerializer(TaggedItemSerializerMixin, serializers.HyperlinkedMo
         self._update_filters(validated_data)
 
         variants = (validated_data.get("filters", {}).get("multivariate", {}) or {}).get("variants", [])
-        variant_rollout_sum = 0
-        for variant in variants:
-            variant_rollout_sum += variant.get("rollout_percentage")
+        variant_rollout_sum = sum((variant.get("rollout_percentage") for variant in variants))
 
         if len(variants) > 0 and variant_rollout_sum != 100:
             raise exceptions.ValidationError(
@@ -609,13 +605,8 @@ class FeatureFlagViewSet(
 
         flags, reasons, _, _ = get_all_feature_flags(self.team_id, distinct_id, groups)
 
-        flags_with_evaluation_reasons = {}
+        flags_with_evaluation_reasons = {flag_key: {"value": flags.get(flag_key, False), "evaluation": reasons[flag_key]} for flag_key in reasons}
 
-        for flag_key in reasons:
-            flags_with_evaluation_reasons[flag_key] = {
-                "value": flags.get(flag_key, False),
-                "evaluation": reasons[flag_key],
-            }
 
         disabled_flags = FeatureFlag.objects.filter(team_id=self.team_id, active=False, deleted=False).values_list(
             "key", flat=True
