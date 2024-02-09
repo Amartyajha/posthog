@@ -15,6 +15,16 @@ const config: StorybookConfig = {
 
     staticDirs: ['public'],
 
+    /**
+     * Function to merge the provided config object with the main config object
+     * @param {Object} config - The config object to be merged
+     * @returns {Object} - The merged config object
+     * @description
+     *   - Create the main config object using the createEntry function
+     *   - Merge the resolve extensions and alias from the config object with the main config object
+     *   - Merge the module rules from the main config object with the config object
+     *   - Only include rules with a test property containing '.mdx' in the merged module rules array
+     */
     webpackFinal: (config) => {
         const mainConfig = createEntry('main')
         return {
