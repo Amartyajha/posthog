@@ -87,6 +87,22 @@ module.exports = {
     },
 } as TestRunnerConfig
 
+/**
+ * Generates a snapshot of the story and compares it to the expected snapshot.
+ * @param {Page} page - The Puppeteer page object.
+ * @param {TestContext} context - The test context object.
+ * @param {StoryContext} storyContext - The story context object.
+ * @param {SupportedBrowserName} browser - The supported browser name.
+ * @returns {Promise<void>} - Resolves when the snapshot matching is complete.
+ * @description
+ *   - Sets the necessary options for the snapshot test.
+ *   - Stops all animations for consistent snapshots.
+ *   - Waits for loaders to disappear, with a reduced timeout to exclude toasts.
+ *   - Waits for a specific selector, if provided.
+ *   - Waits for effects to finish.
+ *   - Waits for all images to load.
+ *   - Takes snapshots in both light and dark themes.
+ */
 async function expectStoryToMatchSnapshot(
     page: Page,
     context: TestContext,
@@ -161,6 +177,18 @@ async function expectStoryToMatchFullPageSnapshot(
     await expectLocatorToMatchStorySnapshot(page, context, browser, theme)
 }
 
+/**
+ * This function is used to expect a story to match a scene snapshot.
+ *
+ * @param {Page} page - The page object.
+ * @param {TestContext} context - The test context object.
+ * @param {SupportedBrowserName} browser - The supported browser name.
+ * @param {SnapshotTheme} theme - The snapshot theme.
+ * @returns {Promise<void>} - Returns a promise that resolves to void.
+ * @description
+ *   - Sets the overflow style of .Navigation3000 to visible to prevent clipping of the screenshot.
+ *   - Calls the expectLocatorToMatchStorySnapshot function passing the main locator, context, browser and theme.
+ */
 async function expectStoryToMatchSceneSnapshot(
     page: Page,
     context: TestContext,
@@ -175,6 +203,23 @@ async function expectStoryToMatchSceneSnapshot(
     await expectLocatorToMatchStorySnapshot(page.locator('main'), context, browser, theme)
 }
 
+/**
+ * Function to expect a story to match the component snapshot.
+ * 
+ * @param {Page} page - The page object.
+ * @param {TestContext} context - The test context object.
+ * @param {SupportedBrowserName} browser - The supported browser name.
+ * @param {SnapshotTheme} theme - The snapshot theme.
+ * @param {string} [targetSelector='#storybook-root'] - The target selector.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the function is complete.
+ * 
+ * @description
+ *   - Evaluates the page and sets the root element and its position.
+ *   - Expands the root element to make popovers visible in the screenshot, if needed.
+ *   - Makes the body transparent for legacy style, otherwise sets the background.
+ *   - Calls expectLocatorToMatchStorySnapshot with target selector and other parameters.
+ */
 async function expectStoryToMatchComponentSnapshot(
     page: Page,
     context: TestContext,
@@ -182,6 +227,14 @@ async function expectStoryToMatchComponentSnapshot(
     theme: SnapshotTheme,
     targetSelector: string = '#storybook-root'
 ): Promise<void> {
+    /**
+     * Changes the styling of the root element to ensure all popovers are visible in the screenshot.
+     * Makes the body transparent for legacy style.
+     * 
+     * @param {string} theme - The theme of the component.
+     * @throws {Error} Throws an error if the root element cannot be found.
+     * @returns {void} 
+     */
     await page.evaluate((theme) => {
         const rootEl = document.getElementById('storybook-root')
         if (!rootEl) {
@@ -190,6 +243,16 @@ async function expectStoryToMatchComponentSnapshot(
         // Make the root element (which is the default screenshot reference) hug the component
         rootEl.style.display = 'inline-block'
         // If needed, expand the root element so that all popovers are visible in the screenshot
+        /**
+         * Adjusts the size of the root element based on the position of the popover element.
+         * @param {HTMLElement} popover - The popover element.
+         * @returns {void} - Does not return a value.
+         * @description
+         *   - If the right edge of the popover element is outside the right edge of the root element, the width of the root element is increased.
+         *   - If the bottom edge of the popover element is outside the bottom edge of the root element, the height of the root element is increased.
+         *   - If the top edge of the popover element is above the top edge of the root element, the height of the root element is increased to accommodate the popover.
+         *   - If the left edge of the popover element is to the left of the left edge of the root element, the width of the root element is increased to accommodate the popover.
+         */
         document.querySelectorAll('.Popover').forEach((popover) => {
             const currentRootBoundingClientRect = rootEl.getBoundingClientRect()
             const popoverBoundingClientRect = popover.getBoundingClientRect()
@@ -215,6 +278,20 @@ async function expectStoryToMatchComponentSnapshot(
     })
 }
 
+/**
+ * Generates a snapshot of a locator and compares it to a story snapshot.
+ * @param {Locator | Page} locator - The locator or page to generate a snapshot from.
+ * @param {TestContext} context - The test context.
+ * @param {SupportedBrowserName} browser - The supported browser name.
+ * @param {SnapshotTheme} theme - The snapshot theme.
+ * @param {LocatorScreenshotOptions} options - The locator screenshot options.
+ * @returns {Promise<void>} - A promise that resolves when the snapshot comparison is complete.
+ * @description
+ *   - Generates a snapshot of the locator using the provided options.
+ *   - Sets a custom snapshot identifier based on the context, theme, and browser.
+ *   - Compares the generated image with the story snapshot using the 'ssim' comparison method.
+ *   - Specifies a failure threshold of 0.01 (1%) and the failure threshold type as 'percent'.
+ */
 async function expectLocatorToMatchStorySnapshot(
     locator: Locator | Page,
     context: TestContext,
